@@ -1,0 +1,80 @@
+Here is a description of each file in the new modular structure, explaining its specific role in your Deep Learning project.
+
+### **1. `preprocess_bcss.py` (The Data Prep Script)**
+
+* **Role:** This is a standalone script you run **only once** before training starts.
+* **What it does:**
+* Reads the huge, high-resolution raw pathology images.
+* **Downsamples** them by a factor of 4 to remove low-level blur (implementing the specific requirement from the article).
+* **Slices** these large images into thousands of small  squares ("patches").
+* **Splits** the patches into `train`, `val`, and `test` folders so your model can learn effectively.
+
+
+
+### **2. `project/config.py` (The Control Panel)**
+
+* **Role:** Centralizes all settings and hyperparameters so you don't have to hunt through code to change learning rates or batch sizes.
+* **What it does:** Defines Python `dataclasses` for:
+* **`DiffNCAConfig`:** Settings for the standard image-space model.
+* **`FourierDiffNCAConfig`:** Settings for the frequency-domain model.
+* **`DataConfig`:** Paths to your BCSS patches or CelebA download folder.
+* **`TrainConfig`:** Training hyperparameters like learning rate (`lr`), total steps (`train_steps`), and diffusion steps (`T`).
+
+
+
+### **3. `project/dataset.py` (The Data Loader)**
+
+* **Role:** Responsible for loading images from your hard drive and feeding them to the GPU.
+* **What it does:**
+* **`get_dataloader`:** A factory function that switches logic based on your config. If you select "bcss", it loads the custom patch folder created by the preprocess script. If "celeba", it downloads the standard face dataset.
+* **`RobustDataset`:** A safety wrapper. If one specific image file is corrupted (which happens often with large downloads), this wrapper catches the crash and silently tries a different image, keeping your training loop alive.
+
+
+
+### **4. `project/models.py` (The Neural Networks)**
+
+* **Role:** Contains the actual Deep Learning architectures.
+* **What it does:**
+* **`NCABlock`:** The core "Neural Cellular Automata" layer. It defines how a pixel "talks" to its neighbors using 3x3 convolutions.
+* **`DiffNCA`:** The standard model. It takes a noisy image `x_t` and time `t`, and uses NCA steps to predict the noise.
+* **`FourierDiffNCA`:** The advanced model. It converts the image to the frequency domain (FFT), runs an NCA there to capture global patterns, and fuses the result with an image-domain NCA.
+
+
+
+### **5. `project/diffusion.py` (The Math)**
+
+* **Role:** Handles the noise schedule and sampling equations (the "Diffusion" part of the project).
+* **What it does:**
+* **`DDPMSchedule`:** Calculates the noise variance (, ) for every timestep. It creates the "Forward Process" (`q_sample`) that destroys your data with noise during training.
+* **`sample_ddpm`:** Implements the "Reverse Process". It starts with pure random noise and iteratively removes it using your trained model to generate a clear image.
+
+
+
+### **6. `project/utils.py` (Helper Tools)**
+
+* **Role:** Contains utility functions that don't belong to any specific model but are needed everywhere.
+* **What it does:**
+* **`EMA` (Exponential Moving Average):** Keeps a "smooth" copy of your model weights. This is standard in Generative AI because it produces much higher quality images than the raw weights.
+* **`normalize` / `denormalize`:** Converts images between the range `[0, 1]` (how they are loaded) and `[-1, 1]` (how the model expects them).
+* **`set_seed`:** Locks the random number generators so your experiments are reproducible.
+
+
+
+### **7. `project/train.py` (The Engine)**
+
+* **Role:** The actual loop that trains the model.
+* **What it does:**
+* Runs the loop for 200,000 steps.
+* Fetches data batches, adds noise, calculates the Loss (MSE), and updates the model weights.
+* Handles **Logging** (printing progress), **Checkpointing** (saving `.pt` files), and **Testing** (generating sample images every 1,000 steps).
+
+
+
+### **8. `project/main.py` (The Entry Point)**
+
+* **Role:** The file you actually execute. It ties everything together.
+* **What it does:**
+* Allows you to toggle `MODEL_TYPE = "DiffNCA"` (for BCSS) or `"FourierDiffNCA"` (for CelebA).
+* Automatically loads the correct configuration and dataset based on that choice.
+* Asks if you want to resume from a saved checkpoint.
+* Starts the `train_runner`.
