@@ -41,7 +41,7 @@ def train_runner(model, dataloader, cfg: TrainConfig):
     ema = EMA(model, decay=0.9999)
 
     os.makedirs(cfg.checkpoint_dir, exist_ok=True)
-    step = 0
+    step = 180000
     start_time = time.time()
     it = iter(dataloader)
 

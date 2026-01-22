@@ -14,7 +14,7 @@ if __name__ == "__main__":
     # ==========================================
     # 1. SELECT YOUR MODEL TYPE HERE
     # ==========================================
-    MODEL_TYPE = "DiffNCA"
+    MODEL_TYPE = "FourierDiffNCA"
 
     if MODEL_TYPE == "DiffNCA":
         print(">>> Configuration: DiffNCA + Breast Cancer (BCSS) Dataset")
