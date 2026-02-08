@@ -42,8 +42,8 @@ class DataConfig:
     image_size: int = 64
 
     # Paper: "utilizing a batch size of 16"
-    # Note: 128 might be too large for the 512-hidden-size model on some GPUs.
-    batch_size: int = 16
+
+    batch_size: int = 32
 
     num_workers: int = 8
 
@@ -71,8 +71,8 @@ class TrainConfig:
     beta_end: float = 2e-2
 
     # Checkpointing
-    log_every: int = 200
+    log_every: int = 1_000
     save_every: int = 10_000
-    test_every: int = 1_000
+    test_every: int = 10_000
     checkpoint_dir: str = "checkpoints"
     device: str = "cuda"

@@ -21,11 +21,11 @@ def generate_evaluation_set(model_type="DiffNCA", num_images=2048, batch_size=32
         cfg = DiffNCAConfig()
         model = DiffNCA(cfg).to(device)
         # Update this to your specific path if needed
-        ckpt_path = "../checkpoint_190000.pt"
+        ckpt_path = "../checkpoint_230000.pt"
     elif model_type == "FourierDiffNCA":
         cfg = FourierDiffNCAConfig()
         model = FourierDiffNCA(cfg).to(device)
-        ckpt_path = "../final.pt"
+        ckpt_path = "../final1.1m.pt"
     else:
         raise ValueError("Unknown model type")
 
@@ -68,14 +68,13 @@ def generate_evaluation_set(model_type="DiffNCA", num_images=2048, batch_size=32
             # Calculate actual batch size for the last batch
             current_batch_size = min(batch_size, num_images - generated_count)
 
-            # Use Mixed Precision for speed
-            with torch.amp.autocast(device_type='cuda', dtype=torch.bfloat16):
-                samples = sample_ddpm(
-                    model,
-                    shape=(current_batch_size, 3, 64, 64),
-                    device=device,
-                    T=1000
-                )
+
+            samples = sample_ddpm(
+                model,
+                shape=(current_batch_size, 3, 128, 128),
+                device=device,
+                T=1000
+            )
 
             # Save individual images
             samples = denormalize(samples.float())
@@ -89,6 +88,6 @@ def generate_evaluation_set(model_type="DiffNCA", num_images=2048, batch_size=32
 
 
 if __name__ == "__main__":
-    # Ensure this matches your folder name
+
     #generate_evaluation_set(model_type="DiffNCA", num_images=2048, output_dir="../data/generated_eval_DiffNCA")
     generate_evaluation_set(model_type="FourierDiffNCA", num_images=2048, output_dir="data/generated_eval_FourierDiffNCA")

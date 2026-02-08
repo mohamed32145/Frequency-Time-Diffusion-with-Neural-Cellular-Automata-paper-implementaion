@@ -57,8 +57,6 @@ def get_dataloader(cfg: DataConfig):
         if not os.path.exists(cfg.bcss_path):
             raise FileNotFoundError(f"BCSS path not found: {cfg.bcss_path}. Run preprocess_bcss.py first.")
 
-        # ImageFolder requires structure: root/class/image.png
-        # preprocess_bcss.py creates: root/data/image.png (so 'data' is the class)
         ds = datasets.ImageFolder(root=cfg.bcss_path, transform=transform)
         print(f"Found {len(ds)} BCSS patches.")
 
