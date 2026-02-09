@@ -77,7 +77,7 @@ The system consists of two coupled Neural Cellular Automata:
 ### 1. Training
 To train the model from scratch on CelebA or Medical datasets:
 ```bash
-python main.py:The script will automatically detect your GPU (cuda) and begin the training loop.
+python main.py#The script will automatically detect your GPU (cuda) and begin the training loop.
 
 ```
 ##  References
